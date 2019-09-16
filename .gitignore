@@ -1,3 +1,5 @@
+.DS_Store
+
 # Exclude manifest
 build/manifest/
 manifest.yaml
