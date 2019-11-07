@@ -24,7 +24,7 @@ async function getPostData(postID, user) {
     region:           'us-east-2'
   });
   const s3 = new AWS.S3(config);
-  const bucket = 'serd-org1';
+  const bucket = 'cmpe195project';
   
   // Retrieve postView belonging to the user and post
   var postView = sequelize.PostView.findOne({ where: {

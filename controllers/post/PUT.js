@@ -14,10 +14,10 @@ const Hashids = require('hashids');
 const config = new AWS.Config({
   accessKeyId:      RuntimeVars.AWS.ID, 
   secretAccessKey:  RuntimeVars.AWS.SECRET, 
-  region:           'us-east-1'
+  region:           'us-east-2'
 });
 const s3 = new AWS.S3(config);
-const bucket = 'cmpe195';
+const bucket = 'cmpe195project';
 
 exports.publishPost = function (req, res, next) {
 
@@ -51,18 +51,18 @@ exports.publishPost = function (req, res, next) {
     var hashID = hashids.encode(postID);
 
     // Save the raw notebook and html to S3
-    const raw =  s3.putObject({
+    const raw = s3.putObject({
       Body:     Buffer.from(draftPost.binary),
       Bucket:   bucket,
       Key:      `${postID}/raw`
     }).promise();
     
     const html = s3.putObject({
-      Body:     draftPost.html,
+      Body:     draftPost.html.final_html,
       Bucket:   bucket,
       Key:      `${postID}/html`
     }).promise();
-    
+
     // Iterate through the tags, and find them in the DB; Create them if not found in the DB.
     // Then add the tag to the post
     tags = [];
