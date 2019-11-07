@@ -14,10 +14,10 @@ const Hashids = require('hashids');
 const config = new AWS.Config({
   accessKeyId:      RuntimeVars.AWS.ID, 
   secretAccessKey:  RuntimeVars.AWS.SECRET, 
-  region:           'us-east-2'
+  region:           'us-east-1'
 });
 const s3 = new AWS.S3(config);
-const bucket = 'serd-org1';
+const bucket = 'cmpe195';
 
 exports.publishPost = function (req, res, next) {
 
