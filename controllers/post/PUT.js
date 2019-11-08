@@ -9,6 +9,7 @@ const schedule = require('node-schedule');
 const AWS = require('aws-sdk');
 const sequelize = require('../../services/sequelize');
 const Hashids = require('hashids');
+const { DateTime } = require('luxon');
 
 // S3 Config
 const config = new AWS.Config({
@@ -86,7 +87,21 @@ exports.publishPost = function (req, res, next) {
     // Delete the draft post from the session
     delete req.session.draftPost;
 
-    return { "hashID": hashID };
+    const now = DateTime.utc().toISO();
 
-  })().then(newID => res.send(newID)).catch(err => next(err));
+    return {
+      html:             draftPost.html.final_html,
+      metadata: {
+        tags:           draftPost.metadata.tags,
+        views:          0,
+        createdAt:      now,
+        updatedAt:      now,
+        title:          draftPost.metadata.title, 
+        summary:        draftPost.metadata.summary,
+        authors:        draftPost.metadata.authors,
+        dataset_link:   draftPost.metadata.dataset_link
+      }
+    };
+
+  })().then(data => res.send(data)).catch(err => next(err));
 }
