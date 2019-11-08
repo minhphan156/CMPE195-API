@@ -94,7 +94,7 @@ async function getSearchResults(query, sort, filters) {
   */
   const finalResults = await sequelize.Metadata.findAll({
 
-    attributes: ['title', 'summary', 'views', 'created_at'],
+    attributes: ['title', 'summary', 'views', 'created_at', 'authors'],
     where: {
       [Op.and]: [
         {
@@ -203,7 +203,8 @@ exports.getResults = function (req, res, next) {
 
         // Image to be previewed on Explore page
         // NOT YET IMPLEMENTED
-        'preview_img': null
+        'preview_img': null,
+        'authors': metadataItem.authors
       }
 
     });
