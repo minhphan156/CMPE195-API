@@ -48,8 +48,9 @@ exports.notebook = function (req, res, next) {
         updatedAt: now,
         views: 0
       },
-      html: html,
-      binary: req.file.buffer
+      html: html.final_html,
+      binary: req.file.buffer,
+      previewImg: html.preview_img
     };
 
     // Split tags into array
@@ -58,7 +59,7 @@ exports.notebook = function (req, res, next) {
     // Save draft post into session
     req.session.draftPost = draftPost;
 
-    res.send({ metadata: draftPost.metadata, html: draftPost.html });
+    res.send({ metadata: draftPost.metadata, html: { final_html: draftPost.html } });
 
   })().then().catch(err => next(err));
 }
