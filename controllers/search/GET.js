@@ -94,7 +94,7 @@ async function getSearchResults(query, sort, filters) {
   */
   const finalResults = await sequelize.Metadata.findAll({
 
-    attributes: ['title', 'summary', 'views', 'created_at', 'authors'],
+    attributes: ['title', 'summary', 'views', 'created_at', 'authors', 'preview_image'],
     where: {
       [Op.and]: [
         {
@@ -183,6 +183,8 @@ exports.getResults = function (req, res, next) {
     const characterSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
     var hashids = new Hashids(salt, hashLength, characterSet);
 
+    const defaultImagePath = 'https://cmpe195project.s3.us-east-2.amazonaws.com/__/default_img.png';
+
     // For every element in SQL query result, store cleaned version to 'finalResults'
     var finalResults = resultsToReturn.map(function (metadataItem) {
       
@@ -202,8 +204,7 @@ exports.getResults = function (req, res, next) {
         'tags': metadataItem.Post.Tags.map(tag => tag.name),
 
         // Image to be previewed on Explore page
-        // NOT YET IMPLEMENTED
-        'preview_img': null,
+        'preview_img': metadataItem.preview_image ? metadataItem.preview_image : defaultImagePath,
         'authors': metadataItem.authors
       }
 

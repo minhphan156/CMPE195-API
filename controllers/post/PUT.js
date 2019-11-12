@@ -32,16 +32,19 @@ exports.publishPost = function (req, res, next) {
     
     var user = sequelize.User.findOne({ where: { id: req.session.user.id } });
     var post = sequelize.Post.create({ notebook_filename: draftPost.metadata.notebook });
+    var postID = (await post).id;
+    
+    const bucketPath = 'https://cmpe195project.s3.us-east-2.amazonaws.com';
     
     // Add metadata to the post
     const metadata = (await post).createMetadatum({
       title:          draftPost.metadata.title, 
       summary:        draftPost.metadata.summary,
       authors:        draftPost.metadata.authors,
-      dataset_link:   draftPost.metadata.dataset_link
+      dataset_link:   draftPost.metadata.dataset_link,
+      preview_image:  draftPost.previewImg ? `${bucketPath}/${postID}/preview` : null
     });
 
-    var postID = (await post).id;
 
     // Set up our Hash ID instance with custom salt and hashLength
     const salt = 'ThaKnowledgePlat4rm';
@@ -64,6 +67,17 @@ exports.publishPost = function (req, res, next) {
       Key:      `${postID}/html`
     }).promise();
 
+    var previewImg;
+    if (draftPost.previewImg !== undefined) {
+      previewImg = s3.putObject({
+        Body:       Buffer.from(req.session.draftPost.previewImg.binary, 'base64'),
+        Bucket:     bucket,
+        Key:        `${postID}/preview`,
+        ContentType:  `image/${draftPost.previewImg.type}`,
+        ACL:      'public-read'
+      }).promise();
+    }
+
     // Iterate through the tags, and find them in the DB; Create them if not found in the DB.
     // Then add the tag to the post
     tags = [];
@@ -80,9 +94,7 @@ exports.publishPost = function (req, res, next) {
     const setUserPromise = (await metadata).setUser(await user);
     
     // Await on remaining promises
-    await raw;
-    await html;
-    await setUserPromise;
+    await Promise.all([previewImg, raw, html, setUserPromise]);
 
     // Delete the draft post from the session
     delete req.session.draftPost;
