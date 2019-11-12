@@ -7,7 +7,7 @@
 const { check } = require('express-validator/check');
 const axios = require('axios');
 const RuntimeVars = require('../../services/RuntimeVars');
-const schedule = require('node-schedule');
+const { DateTime } = require('luxon');
 
 /**
  * Delegates rendering of the notebook to render engine
@@ -39,8 +39,15 @@ exports.notebook = function (req, res, next) {
     // Send the notebook HTML back as the response
     var html = await getNotebookHTML(req.file.buffer.toString());
 
+    const now = DateTime.utc().toISO();
+
     var draftPost = {
-      metadata: req.body,
+      metadata: {
+        ...req.body,
+        createdAt: now,
+        updatedAt: now,
+        views: 0
+      },
       html: html,
       binary: req.file.buffer
     };
