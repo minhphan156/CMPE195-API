@@ -8,6 +8,7 @@ const RuntimeVars = require('../../services/RuntimeVars');
 const AWS = require('aws-sdk');
 const sequelize = require('../../services/sequelize');
 const Hashids = require('hashids');
+const { encode, decode } = require('../../lib/ID');
 
 /**
  * Gets post data from a given post id
@@ -84,15 +85,16 @@ async function getPostData(postID, user) {
   var data = {
     html:           (await html).Body.toString(),
     metadata: {
-      authors:      (await metadata).get().authors,
-      datasetLink:  (await metadata).get().datasetLink,
-      summary:      (await metadata).get().summary,
+      authors:      (await metadata).authors,
+      datasetLink:  (await metadata).datasetLink,
+      summary:      (await metadata).summary,
       tags:         tags,
-      title:        (await metadata).get().title,
-      views:        (await metadata).get().views,
-      createdAt:    (await metadata).get().created_at,
-      updatedAt:    (await metadata).get().updated_at
-    }
+      title:        (await metadata).title,
+      views:        (await metadata).views,
+      createdAt:    (await metadata).created_at,
+      updatedAt:    (await metadata).updated_at
+    },
+    hashID:         encode(postID)
   };
 
   return data;
@@ -107,15 +109,8 @@ async function getPostData(postID, user) {
  * @returns {Object}
  */
 exports.getPost = function (req, res, next) {
-
-  // This section should be moved to an external area in the future.
-  const salt = 'ThaKnowledgePlat4rm';
-  const hashLength = 7;
-  const characterSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-  var hashids = new Hashids(salt, hashLength, characterSet);
-
   const hashID = req.params.id;
-  const postID = hashids.decode(hashID)[0];
+  const postID = decode(hashID);
 
   // Invalid hash id given
   if (postID === undefined)

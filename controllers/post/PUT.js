@@ -4,12 +4,11 @@
  * @module post-PUT
  */
 
-const RuntimeVars = require('../../services/RuntimeVars');
-const schedule = require('node-schedule');
 const AWS = require('aws-sdk');
-const sequelize = require('../../services/sequelize');
-const Hashids = require('hashids');
 const { DateTime } = require('luxon');
+const RuntimeVars = require('../../services/RuntimeVars');
+const sequelize = require('../../services/sequelize');
+const { encode } = require('../../lib/ID');
 
 // S3 Config
 const config = new AWS.Config({
@@ -33,6 +32,7 @@ exports.publishPost = function (req, res, next) {
     var user = sequelize.User.findOne({ where: { id: req.session.user.id } });
     var post = sequelize.Post.create({ notebook_filename: draftPost.metadata.notebook });
     var postID = (await post).id;
+    const hashID = encode(postID);
     
     const bucketPath = 'https://cmpe195project.s3.us-east-2.amazonaws.com';
     
@@ -41,28 +41,19 @@ exports.publishPost = function (req, res, next) {
       title:          draftPost.metadata.title, 
       summary:        draftPost.metadata.summary,
       authors:        draftPost.metadata.authors,
-      dataset_link:   draftPost.metadata.dataset_link,
+      dataset_link:   draftPost.metadata.datasetLink,
       preview_image:  draftPost.previewImg ? `${bucketPath}/${postID}/preview` : null
     });
-
-
-    // Set up our Hash ID instance with custom salt and hashLength
-    const salt = 'ThaKnowledgePlat4rm';
-    const hashLength = 7;
-    const characterSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-    var hashids = new Hashids(salt, hashLength, characterSet);
-
-    var hashID = hashids.encode(postID);
 
     // Save the raw notebook and html to S3
     const raw = s3.putObject({
       Body:     Buffer.from(draftPost.binary),
       Bucket:   bucket,
-      Key:      `${postID}/raw`
+      Key:      `${postID}/${draftPost.metadata.notebook}`
     }).promise();
     
     const html = s3.putObject({
-      Body:     draftPost.html.final_html,
+      Body:     draftPost.html,
       Bucket:   bucket,
       Key:      `${postID}/html`
     }).promise();
@@ -111,8 +102,9 @@ exports.publishPost = function (req, res, next) {
         title:          draftPost.metadata.title, 
         summary:        draftPost.metadata.summary,
         authors:        draftPost.metadata.authors,
-        dataset_link:   draftPost.metadata.dataset_link
-      }
+        dataset_link:   draftPost.metadata.datasetLink
+      },
+      hashID
     };
 
   })().then(data => res.send(data)).catch(err => next(err));
