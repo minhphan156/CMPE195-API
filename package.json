@@ -10,7 +10,7 @@
     "@okta/okta-sdk-nodejs": "^1.2.0",
     "aws-sdk": "^2.570.0",
     "axios": "^0.18.0",
-    "connect-pg-simple": "^5.0.0",
+    "connect-pg-simple": "^6.0.1",
     "connect-session-sequelize": "^6.0.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
