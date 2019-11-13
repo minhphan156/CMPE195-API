@@ -17,5 +17,6 @@ router.use('/feed', require('./feed'));
 router.use('/post', require('./post'));
 router.use('/signin', require('./signin'));
 router.use('/search', require('./search'));
+router.use('/notebook', require('./notebook'));
 
 module.exports = router;
