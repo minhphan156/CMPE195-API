@@ -86,7 +86,7 @@ async function getPostData(postID, user) {
     html:           (await html).Body.toString(),
     metadata: {
       authors:      (await metadata).authors,
-      datasetLink:  (await metadata).datasetLink,
+      datasetLink:  (await metadata).dataset_link,
       summary:      (await metadata).summary,
       tags:         tags,
       title:        (await metadata).title,
