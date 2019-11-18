@@ -41,7 +41,7 @@ exports.publishPost = function (req, res, next) {
       title:          draftPost.metadata.title, 
       summary:        draftPost.metadata.summary,
       authors:        draftPost.metadata.authors,
-      dataset_link:   draftPost.metadata.datasetLink,
+      dataset_link:   draftPost.metadata.dataset,
       preview_image:  draftPost.previewImg ? `${bucketPath}/${postID}/preview` : null
     });
 
